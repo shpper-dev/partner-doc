@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>📘 Shpper API Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        display: flex;
+        height: 100vh;
+        background-color: #fafafa;
+      }
+
+      .sidebar {
+        width: 240px;
+        background-color: #f1f1f1;
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .sidebar h2 {
+        margin-top: 0;
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 1rem;
+      }
+
+      .sidebar a {
+        color: #333;
+        text-decoration: none;
+        margin: 0.3rem 0;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.95rem;
+        transition: background-color 0.2s;
+      }
+
+      .sidebar a:hover {
+        background-color: #e0e0e0;
+      }
+
+      .sidebar a.active {
+        background-color: #dcdcdc;
+        font-weight: 500;
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        color: #2c2c2c;
+      }
+
+      .content h1,
+      .content h2,
+      .content h3 {
+        color: #333;
+        margin-top: 1.5rem;
+      }
+
+      .content pre {
+        background-color: #f5f5f5;
+        color: #333;
+        padding: 1rem;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+
+      .content code {
+        font-family: Consolas, monospace;
+        background-color: #eee;
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+      }
+
+      .content pre code {
+        background-color: transparent;
+        padding: 0;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          flex-direction: row;
+          overflow-x: auto;
+          border-right: none;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .sidebar a {
+          flex: 1;
+          text-align: center;
+        }
+
+        .content {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>📚 Shpper Partner Docs</h2>
+      <a class="nav-link active" data-file="assets/user_onboarding_doc.md">
+        👤 User Onboarding with Address
+      </a>
+      <a class="nav-link" data-file="assets/request_create_doc.md">
+        📦 Request Creation
+      </a>
+    </div>
+    <div class="content" id="markdown-container">
+      <p>📄 Loading documentation...</p>
+    </div>
+
+    <script>
+      const links = document.querySelectorAll(".nav-link");
+      const container = document.getElementById("markdown-container");
+
+      function loadMarkdown(path) {
+        fetch(path)
+          .then((res) => res.text())
+          .then((md) => {
+            container.innerHTML = marked.parse(md);
+          })
+          .catch(() => {
+            container.innerHTML =
+              "<p style='color:red;'>❌ Failed to load documentation.</p>";
+          });
+      }
+
+      links.forEach((link) => {
+        link.addEventListener("click", () => {
+          links.forEach((l) => l.classList.remove("active"));
+          link.classList.add("active");
+          loadMarkdown(link.dataset.file);
+        });
+      });
+
+      // Load default view
+      document.addEventListener("DOMContentLoaded", () => {
+        const defaultLink = document.querySelector(".nav-link.active");
+        if (defaultLink) {
+          loadMarkdown(defaultLink.dataset.file);
+        }
+      });
+    </script>
+  </body>
+</html>
