@@ -1,91 +1,115 @@
-# 📘 Welcome to Shpper Partner API Docs
+# Welcome to Shpper Partner API Documentation
 
-Welcome, developer! 👋
+Hello Developer!
 
-This is the official documentation hub for integrating with **Shpper’s Partner APIs**. These APIs are designed for external services or admins to:
+This is your central hub for understanding and integrating with **Shpper’s Partner APIs**. These endpoints are designed for partners and admin tools to:
 
-- Onboard users and manage their delivery addresses
-- Create product delivery requests on behalf of customers
-- Search for available travelers (trip routes)
-- Lookup location or user metadata
-- Build automation around the Shpper fulfillment system
-
----
-
-## 📌 How to Use This Documentation
-
-The sidebar provides links to key feature modules:
-
-| 📁 Section                            | 🧭 Description |
-|--------------------------------------|----------------|
-| **👤 User Onboarding with Address**  | API to create a new user with their delivery address and preferred currency. |
-| **📦 Request Creation**              | API for creating a request (including uploading product images) for existing users. |
-| **📮 User Lookup by Email**          | Helps check if a user is already registered in the system. |
-| **🗺️ Location Search**              | Fetch locations (regions, countries, cities) that are usable in trip and product request flows. |
-| **✈️ Trip Search**                   | Lets you query traveler trips available from-to locations based on the buyer’s intention. |
-| **🧾 Request Listing by User ID**    | Fetch recent 5 requests made by a specific user. |
-| **📘 You're Here!**                  | This home page guide. |
+- Onboard users and manage addresses
+- Create buyer requests with product images
+- Search for trips (active trips)
+- Look up location and user metadata
+- Build automations on top of Shpper’s fulfillment engine
 
 ---
 
-## 🔧 Integration Guidelines
+## How to Use This Documentation
 
-### 1. 🔐 Authentication
+Use the left sidebar to navigate between major API features:
 
-All APIs are **public** for trusted backend partner access. No token is required. However, misuse or abuse will result in IP ban.
-
-> *Only authorized services and admin panels should call these APIs.*
+| Section                          | Description                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------- |
+| **API Guide (You’re Here)**      | Entry guide to understand API usage.                                             |
+| **User Lookup by Email**         | Check if a user already exists using their email address.                        |
+| **User Onboarding with Address** | Create a new user profile along with delivery address and preferred currency.    |
+| **Request Creation**             | Create a product delivery request for an existing user (with image support).     |
+| **Location Search**              | Get regions, countries, or cities that can be used in trips or product requests. |
+| **Trip Search**                  | Find upcoming traveler trips between selected locations.                         |
+| **User’s Requests List**         | Fetch the latest 5 requests created by a user.                                   |
 
 ---
 
-### 2. ⚙️ Response Structure
+## Integration Guidelines
 
-- All APIs respond with standard JSON.
-- Errors are returned with `error` key and proper status codes.
+### Authentication
 
-Example:
+All APIs are currently **public** and meant for trusted server-to-server access.
+
+> ❗ Avoid exposing these APIs from public or frontend clients. Abuse may result in access blocks.
+
+---
+
+### Response Format
+
+All endpoints return JSON. On error, you'll receive:
 
 ```json
 {
-  "error": "User not found."
+  "error": "Detailed error message here"
 }
 ```
 
 ---
 
-### 3. 📷 Image Upload
+### Image Upload
 
-When creating requests, product images should be passed as **base64 strings**, which are automatically converted to image URLs via AWS S3.
+For product request creation, images are passed as **base64 strings**. These are automatically:
 
----
-
-### 4. 🧭 Location Selection
-
-Use `/location/search/` for autocomplete functionality before sending location data in:
-- Product requests
-- Trip search
-
-Use the **`searchTerm`** field from the results when filtering trips or creating payloads.
+- Uploaded to our media storage
+- Replaced with accessible image URLs in the request payload
 
 ---
 
-## 📥 Example Workflow
+### Location-Based Data
 
-Typical request creation via admin panel:
-
-1. Search or onboard a user via `/onboard/`
-2. Add delivery address (if not provided in onboarding)
-3. Use `/location/search/` to suggest `productLocations`
-4. Create a request via `/request/create/`
-5. View it using `/request/list/?uid=...`
+Before submitting product or trip data, use the `/location/search/` API to autocomplete locations.
 
 ---
 
-## 🤝 Contact & Support
+### **Shpper Partner API Endpoints**
 
-Need help? Reach out to the Shpper team at:
+| Endpoint                             | Method | Query Params     | Required                     | Description                                                                                                           |
+| ------------------------------------ | ------ | ---------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `/xenogate/partner/lookup/`          | `GET`  | `email`          | ✅                           | Get user profile using email (returns user ID, name, phone).                                                          |
+| `/xenogate/partner/onboard/`         | `POST` | –                | –                            | Create a user with email, name, phone, country & optional delivery address.                                           |
+| `/xenogate/partner/address/create/`  | `POST` | –                | –                            | Add a new delivery address for an existing user.                                                                      |
+| `/xenogate/partner/trip/list/`       | `GET`  | `from` <br> `to` | ❌ optional <br> ❌ optional | Search scheduled trips. If both `from` and `to` are given, filtered search. If none provided, lists all active trips. |
+| `/xenogate/partner/request/create/`  | `POST` | –                | –                            | Create a product request for a user (requires existing customer ID and default address).                              |
+| `/xenogate/partner/request/list/`    | `GET`  | `uid`            | ✅                           | Returns latest 5 product requests for a user.                                                                         |
+| `/xenogate/partner/location/search/` | `GET`  | `search`         | ✅                           | Search across custom regions, countries, and cities using search terms.                                               |
 
-📧 **support@shpper.net**  
-🌐 [www.shpper.net](https://www.shpper.net)
+---
 
-Let’s build something amazing 🚀
+### Example: Using Query Parameters
+
+- **Lookup User**
+  `GET /xenogate/partner/lookup/?email=zahid@example.com`
+
+- **Search Trips with Filters**
+  `GET /xenogate/partner/trip/list/?from=Bangladesh&to=Dubai`
+
+- **Search Locations**
+  `GET /xenogate/partner/location/search/?search=Dubai`
+
+---
+
+## 📌 Typical Workflow
+
+Here’s a typical flow for creating a product delivery request:
+
+1. **Check if user exists** via `/lookup/?email=...`
+2. **Create user** via `/onboard/` if needed
+3. **Add address** via `/address/create/` if not already provided
+4. **Search locations** via `/location/search/?search=...`
+5. **Create request** via `/request/create/`
+6. **View latest requests** via `/request/list/?uid=...`
+
+---
+
+## Need Help?
+
+If you're stuck, feel free to contact the Shpper support team:
+
+- 📧 **[support@shpper.net](mailto:support@shpper.net)**
+- 🌐 [www.shpper.net](https://www.shpper.net)
+
+Let’s build a better shopping future together
