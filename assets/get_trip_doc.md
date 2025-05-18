@@ -1,100 +1,138 @@
-## ✈️ Trip Search API - From & To Location
+# ✈️ Trip Search API
 
-This API allows you to retrieve **available upcoming trips** from Firestore based on `from` and `to` location values. It filters and returns **only active trips** within the next 30 days.
+This API helps customers (buyers) find available traveler trips who are moving from a desired **source (buy from)** location to a **destination (delivery to)** location. This aligns with the buyer’s perspective rather than the traveler's.
 
-### 🔗 Endpoint
+---
 
-```
-GET /xenogate/partner/trip/search/
-```
-
-### 🧾 Query Parameters
-
-| Param  | Type   | Required | Description               |
-| ------ | ------ | -------- | ------------------------- |
-| `from` | string | ✅ Yes   | Departure location name   |
-| `to`   | string | ✅ Yes   | Destination location name |
-
-### ✅ Success Response
-
-Returns a list of trips that match the criteria.
-
-#### Example Request
+## 🔗 Endpoint
 
 ```
-GET /xenogate/partner/trip/search/?from=Bangladesh&to=Dubai
+
+GET /xenogate/partner/trip/list/
+
 ```
 
-#### Example Response
+---
+
+## 🧾 Query Parameters
+
+| Parameter | Type   | Required | Description                                    |
+| --------- | ------ | -------- | ---------------------------------------------- |
+| `from`    | string | Optional | The location the customer wants to buy from    |
+| `to`      | string | Optional | The location where the customer wants delivery |
+
+- If both parameters are provided, the trips are filtered accordingly.
+- If **no query params** are given, the API returns the latest 200 active trips (sorted by return date).
+
+---
+
+## ✅ Example Request
+
+```
+
+GET /xenogate/partner/trip/search/?from=Dubai\&to=Bangladesh
+
+```
+
+---
+
+## ✅ Successful Response
 
 ```json
 {
+  "message": "2 trips found",
   "results": [
     {
-      "id": "TRAVELER_ID_TIMESTAMP_INDEX",
-      "userId": "Firebase UID",
-      "travelerName": "Traveler Full Name",
-      "travelerEmail": "email@example.com",
-      "travelerPhone": "+971XXXXXXXXX",
-      "from": {
-        "location": "Dhaka, Bangladesh",
-        "country": "Bangladesh",
-        "code": "DAC",
-        "region": "AS",
-        "photo": "https://.../Dhaka.jpg",
-        "searchTerms": ["dhaka", "bangladesh"]
-      },
-      "to": {
-        "location": "Dubai, United Arab Emirates",
-        "country": "United Arab Emirates",
-        "code": "DXB",
-        "region": "AS",
-        "photo": "https://.../Dubai.jpg",
-        "searchTerms": ["dubai", "uae"]
-      },
-      "departureDate": 1748520000000,
-      "returnDate": 1748433600000,
-      "departureDateStr": "Thu, 29 May",
-      "returnDateStr": "Wed, 28 May",
-      "isActive": true,
+      "id": "abc123_xyz456",
+      "userId": "user_firebase_uid",
+      "travelerName": "John Doe",
+      "travelerEmail": "john@example.com",
+      "travelerPhone": "971500000000",
+      "departureDate": 1747684740000,
+      "departureDateStr": "Mon, 19 May",
+      "returnDate": 1747511940000,
+      "returnDateStr": "Sat, 17 May",
       "isKYCVerified": true,
+      "isActive": true,
       "isOneWay": true,
+      "createdAt": 1745491816574,
+      "shpperRole": "",
       "hotelName": null,
       "hotelCheckInDate": null,
       "hotelCheckOutDate": null,
-      "shpperRole": "",
-      "createdAt": 1746348967971
+      "from": {
+        "location": "Dubai, United Arab Emirates",
+        "country": "United Arab Emirates",
+        "countryCode": "AE",
+        "region": "AS",
+        "searchTerms": ["dubai", "uae"],
+        "photo": "https://shpper-city.s3.../Dubai.jpg"
+      },
+      "to": {
+        "location": "Dhaka, Bangladesh",
+        "country": "Bangladesh",
+        "countryCode": "BD",
+        "region": "AS",
+        "searchTerms": ["dhaka", "bangladesh"],
+        "photo": "https://shpper-city.s3.../Dhaka.jpg"
+      }
     }
   ]
 }
 ```
 
-### ❌ Error Responses
+---
 
-#### Missing Query Parameters
+## ❌ Missing Params Example
 
-````json
-{
-  "error": "'from' and 'to' query parameters are required."
-}
+If neither `from` nor `to` is provided:
 
-#### Internal Error
+```bash
+GET /xenogate/partner/trip/search/
+```
+
+Returns:
+
 ```json
 {
-  "error": "Internal server error occurred."
+  "message": "24 trips found",
+  "results": [ ... latest 200 active trips ... ]
 }
-
-### 📝 Notes
-- Trips are filtered by `isActive = true`.
-- Only trips returning within **30 days from today** are considered.
-- `from` and `to` locations are matched against search terms.
-- Results are sorted by return date ascending.
-
-### 🔁 Related
-- Trips are pulled from the `schedule_trips` Firestore collection.
-- Firestore composite index might be required for optimal performance (check Firebase console if errors arise).
+```
 
 ---
-🛫 This endpoint helps buyers discover available trips matching their product destination. Great for powering request-based logistics!
 
-````
+## ⚠️ Error Response
+
+```json
+{
+  "error": "Internal server error: ..." // If unexpected failure
+}
+```
+
+---
+
+## 🧠 Logic Summary (Important!)
+
+- `from`: Where the customer wants to buy the product from (matches traveler's `from`)
+- `to`: Where the customer wants delivery (matches traveler's `to`)
+- This model ensures travelers are shown **only if their trip route supports the buyer’s intent**.
+
+---
+
+## 🔁 Example Use Cases
+
+- **User in Bangladesh wants to order something from Dubai:**
+
+  → `from=Dubai&to=Bangladesh`
+
+- **User exploring any incoming trips to UAE from anywhere:**
+
+  → `to=UAE`
+
+---
+
+## 📎 Notes for Frontend Developers
+
+- Location names should match entries in the `searchTerms` array (usually lowercase city or country names).
+- For location search or autocomplete, use `/xenogate/partner/location/search/` API.
