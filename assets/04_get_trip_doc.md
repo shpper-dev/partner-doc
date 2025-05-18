@@ -30,7 +30,7 @@ GET /xenogate/partner/trip/list/
 
 ```
 
-GET /xenogate/partner/trip/search/?from=Dubai\&to=Bangladesh
+GET /xenogate/partner/trip/list/?from=Dubai\&to=Bangladesh
 
 ```
 
@@ -88,7 +88,7 @@ GET /xenogate/partner/trip/search/?from=Dubai\&to=Bangladesh
 If neither `from` nor `to` is provided:
 
 ```bash
-GET /xenogate/partner/trip/search/
+GET /xenogate/partner/trip/list/
 ```
 
 Returns:

@@ -7,7 +7,7 @@ GET /xenogate/partner/lookup/?email=zahid@example.com
 ```
 
 **Description:**
-Check if a user exists in Firebase Authentication by providing their email address. Returns basic user profile information if found.
+Check if a user exists in Authentication by providing their email address. Returns basic user profile information if found.
 
 ---
 
@@ -41,5 +41,3 @@ Check if a user exists in Firebase Authentication by providing their email addre
 | `email`   | string | ✅       | Email address to look up user |
 
 ---
-
-Let me know if you want to add this to your sidebar HTML or save it as a `.md` file for GitHub Pages.
