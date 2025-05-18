@@ -38,6 +38,20 @@ All APIs are currently **public** and meant for trusted server-to-server access.
 
 ---
 
+## 🔐 API Authentication (Important)
+
+All requests must include a valid API Key in the request header.
+
+> Missing or invalid API keys will result in a 403 Forbidden response.
+
+### 🔑 Header Format
+
+```http
+Authorization: Api-Key DqZWqMQu.IzyuZ6FZu8ZRm7CJAloecnBJkzXcWf4Z
+```
+
+---
+
 ### Response Format
 
 All endpoints return JSON. On error, you'll receive:
